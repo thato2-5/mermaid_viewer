@@ -1,0 +1,337 @@
+1. System Architecture Diagram
+
+graph TB
+    subgraph "Client Layer"
+        Browser[Web Browser]
+    end
+    
+    subgraph "Application Layer"
+        Flask[Flask Application]
+        Auth[Authentication Module]
+        Routes[Route Handlers]
+        PDF[PDF Generator]
+    end
+    
+    subgraph "Data Layer"
+        DB[(SQLite Database)]
+        Models[Data Models]
+        FS[File Storage]
+    end
+    
+    Browser --> Flask
+    Flask --> Auth
+    Flask --> Routes
+    Flask --> PDF
+    
+    Routes --> Models
+    Models --> DB
+    PDF --> FS
+    Routes --> FS
+    
+2. Database Schema Diagram
+
+erDiagram
+    User {
+        int id PK
+        string username UK
+        string email UK
+        string password_hash
+        datetime created_at
+    }
+    
+    Inspection {
+        int id PK
+        string room_number
+        string building
+        datetime inspection_date
+        int inspector_id FK
+        int cleanliness_score
+        int maintenance_score
+        int safety_score
+        int overall_score
+        text cleanliness_notes
+        text maintenance_notes
+        text safety_notes
+        text general_notes
+        string status
+        boolean report_generated
+        string report_path
+        datetime created_at
+        datetime updated_at
+    }
+    
+    InspectionImage {
+        int id PK
+        int inspection_id FK
+        string filename
+        string file_path
+        string caption
+        datetime created_at
+    }
+    
+    User ||--o{ Inspection : "creates"
+    Inspection ||--o{ InspectionImage : "contains"
+    
+3. User Authentication Flow
+
+sequenceDiagram
+    participant U as User
+    participant B as Browser
+    participant F as Flask App
+    participant DB as Database
+    
+    U->>B: Access login page
+    B->>F: GET /login
+    F-->>B: Render login.html
+    
+    U->>B: Enter credentials
+    B->>F: POST /login (credentials)
+    F->>DB: Query User table
+    DB-->>F: User data
+    
+    alt Valid Credentials
+        F->>F: Set session/login_user
+        F-->>B: Redirect to /dashboard
+        B->>F: GET /dashboard
+        F-->>B: Render dashboard.html
+    else Invalid Credentials
+        F-->>B: Flash error message
+        F-->>B: Re-render login.html
+    end
+    
+4. Inspection Creation Workflow
+
+flowchart TD
+    A[Start: Create Inspection] --> B{User Authenticated?}
+    B -->|No| C[Redirect to Login]
+    B -->|Yes| D[Display Create Form]
+    
+    D --> E[User Fills Form & Uploads Images]
+    E --> F[Submit Form Data]
+    
+    F --> G[Validate Input Data]
+    G --> H[Create Inspection Record]
+    H --> I[Save to Database]
+    
+    I --> J{Images Uploaded?}
+    J -->|Yes| K[Process Each Image]
+    K --> L[Generate Unique Filename]
+    L --> M[Save to Upload Folder]
+    M --> N[Create Image Records]
+    N --> O[Commit Transaction]
+    
+    J -->|No| O
+    O --> P[Flash Success Message]
+    P --> Q[Redirect to Inspections List]
+    Q --> R[End]
+    
+5. PDF Report Generation Flow
+
+sequenceDiagram
+    participant U as User
+    participant F as Flask App
+    participant DB as Database
+    participant FS as File System
+    participant PDF as ReportLab
+    
+    U->>F: Click "Generate Report"
+    F->>DB: Fetch Inspection Data
+    DB-->>F: Inspection Details
+    F->>DB: Fetch Related Images
+    DB-->>F: Image Metadata
+    
+    F->>PDF: Create PDF Document
+    PDF->>PDF: Add Title & Details Table
+    PDF->>PDF: Add Scores Table
+    PDF->>PDF: Add Notes Sections
+    
+    loop For Each Image
+        F->>FS: Load Image File
+        FS-->>F: Image Binary
+        F->>PDF: Embed Image in PDF
+    end
+    
+    PDF-->>F: Generated PDF Buffer
+    F->>FS: Save PDF to Upload Folder
+    F->>DB: Update report_generated flag
+    F-->>U: Send PDF as Download
+    
+6. Role-Based Access Control
+
+stateDiagram-v2
+    [*] --> Unauthenticated
+    
+    Unauthenticated --> Authenticated: Login Successful
+    Authenticated --> Unauthenticated: Logout/Timeout
+    
+    state Authenticated {
+        [*] --> Dashboard
+        Dashboard --> Inspections: View Inspections
+        Dashboard --> CreateInspection: Create New
+        Dashboard --> Reports: View Reports
+        
+        Inspections --> ViewInspection: Select Inspection
+        ViewInspection --> GenerateReport: Generate PDF
+        
+        state Permission_Check {
+            [*] --> CheckOwner
+            CheckOwner --> AccessGranted: Owner Matches
+            CheckOwner --> AccessDenied: Not Owner
+        }
+    }
+    
+    Unauthenticated: Only access to<br>login page
+    AccessGranted: Full access to<br>owned resources
+    AccessDenied: Redirect to<br>dashboard/error
+    
+7. File Upload and Management
+
+graph LR
+    subgraph "Upload Process"
+        A[User Selects Images] --> B[Client Validation]
+        B --> C[Form Submission]
+        C --> D[Server Validation]
+        D --> E[Generate Secure Filename]
+        E --> F[Save to Upload Folder]
+        F --> G[Create DB Record]
+    end
+    
+    subgraph "File Storage Structure"
+        H[static/uploads/] --> I[inspection_1_image1.jpg]
+        H --> J[inspection_1_image2.jpg]
+        H --> K[report_1_20240101.pdf]
+        H --> L[report_2_20240102.pdf]
+    end
+    
+    subgraph "File Access"
+        M[View Inspection] --> N[Load Images]
+        O[Generate Report] --> P[Embed Images]
+        Q[Download Report] --> R[Serve PDF]
+    end
+    
+    G --> H
+    N --> I
+    P --> I
+    R --> K
+    
+8. Dashboard Components and Data Flow
+
+graph TB
+    subgraph "Data Sources"
+        A[Inspection Table]
+        B[User Table]
+    end
+    
+    subgraph "Dashboard Controller"
+        C[GET /dashboard]
+        D[Query Database]
+        E[Aggregate Statistics]
+    end
+    
+    subgraph "Dashboard View"
+        F[Statistics Cards]
+        G[Recent Inspections Table]
+        H[Quick Actions]
+    end
+    
+    subgraph "Statistics"
+        I[Total Inspections]
+        J[Completed Inspections]
+        K[Pending Inspections]
+    end
+    
+    A --> D
+    B --> D
+    D --> E
+    E --> I
+    E --> J
+    E --> K
+    E --> G
+    C --> F
+    C --> G
+    C --> H
+    
+9. API Endpoints Overview
+
+graph LR
+    subgraph "Public Routes"
+        P1[/ GET /<br>Redirect to Login/]
+        P2[/ GET/POST /login<br>User Authentication/]
+    end
+    
+    subgraph "Protected Routes<br>(Require Login)"
+        PR1[/ GET /dashboard<br>User Dashboard/]
+        PR2[/ GET /inspections<br>List Inspections/]
+        PR3[/ GET/POST /inspections/create<br>Create Inspection/]
+        PR4[/ GET /inspections/id<br>View Inspection/]
+        PR5[/ GET /inspections/id/generate_report<br>Generate PDF/]
+        PR6[/ GET /reports<br>Generated Reports/]
+        PR7[/ GET /download_report/filename<br>Download PDF/]
+    end
+    
+    subgraph "API Endpoints"
+        API1[/ GET /api/inspections/id/images<br>Get Images/]
+        API2[/ PUT /api/inspections/id/images/image_id<br>Update Caption/]
+    end
+    
+    PR4 --> API1
+    API1 --> API2
+    
+10. Complete Application Flowchart
+
+flowchart TD
+    Start([User Accesses App]) --> Auth{Authenticated?}
+    
+    Auth -->|No| Login[Login Process]
+    Login --> AuthCheck{Valid Credentials?}
+    AuthCheck -->|Yes| SetSession[Set User Session]
+    AuthCheck -->|No| LoginError[Show Error]
+    LoginError --> Login
+    
+    Auth -->|Yes| Dashboard[Load Dashboard]
+    
+    SetSession --> Dashboard
+    
+    Dashboard --> Menu{User Action}
+    
+    Menu -->|View Inspections| InspectionList[Load Inspections]
+    Menu -->|Create Inspection| CreateForm[Load Create Form]
+    Menu -->|View Reports| ReportList[Load Reports]
+    Menu -->|Logout| LogoutProcess[Clear Session]
+    LogoutProcess --> Login
+    
+    InspectionList --> Filter{Apply Filters?}
+    Filter -->|Yes| ApplyFilters[Filter Results]
+    Filter -->|No| DisplayResults[Display All]
+    ApplyFilters --> DisplayResults
+    
+    DisplayResults --> Action{Select Action}
+    Action -->|View Details| ViewInspection[Load Inspection]
+    Action -->|Generate Report| GeneratePDF[Generate PDF]
+    Action -->|Back| Dashboard
+    
+    CreateForm --> SubmitForm[Submit Data]
+    SubmitForm --> Validate{Validation Passed?}
+    Validate -->|No| ShowErrors[Display Errors]
+    Validate -->|Yes| SaveDB[Save to Database]
+    ShowErrors --> CreateForm
+    
+    SaveDB --> ProcessImages[Process Uploaded Images]
+    ProcessImages --> Success[Show Success Message]
+    Success --> InspectionList
+    
+    ViewInspection --> Update{Update Images?}
+    Update -->|Yes| API[Call Update API]
+    Update -->|No| Stay[Stay on Page]
+    API --> Stay
+    
+    GeneratePDF --> BuildPDF[Build PDF Document]
+    BuildPDF --> SavePDF[Save PDF File]
+    SavePDF --> UpdateDB[Update Report Status]
+    UpdateDB --> Download[Offer Download]
+    Download --> ViewInspection
+    
+    ReportList --> DownloadReport[Download Report]
+    DownloadReport --> ReportList
+    
+

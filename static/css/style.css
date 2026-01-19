@@ -1,0 +1,161 @@
+/* Custom Styles for Mermaid Diagram Viewer */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+.mermaid-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+    overflow: auto;
+    max-height: 80vh;
+    transition: transform 0.3s ease;
+}
+
+.mermaid-container svg {
+    max-width: 100%;
+    height: auto;
+}
+
+.code-container {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background-color: #282c34;
+    color: #abb2bf;
+    border-radius: 4px;
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+}
+
+.code-container code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.preview-text {
+    cursor: pointer;
+    font-family: monospace;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px solid #e9ecef;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Diagram type badges */
+.badge.bg-success { background-color: #28a745 !important; }
+.badge.bg-info { background-color: #17a2b8 !important; }
+.badge.bg-warning { background-color: #ffc107 !important; color: #212529; }
+.badge.bg-danger { background-color: #dc3545 !important; }
+
+/* Table styling */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mermaid-container {
+        padding: 10px;
+        max-height: 60vh;
+    }
+    
+    .navbar .form-control {
+        margin-top: 10px;
+    }
+    
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 5px;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Animation for copy button */
+@keyframes copySuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.btn-success {
+    animation: copySuccess 0.3s ease;
+}
+
+/* Tooltip customization */
+.tooltip {
+    font-size: 0.875rem;
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0,0,0,.1);
+    border-radius: 50%;
+    border-top-color: #007bff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -1,0 +1,389 @@
+1. System Architecture Diagram
+
+graph TB
+    subgraph "Client Layer"
+        A[Web Browser]
+        B[Mobile Browser]
+    end
+    
+    subgraph "Flask Application Layer"
+        C[Flask App]
+        D[Authentication Module]
+        E[API Endpoints]
+        F[Report Generation]
+        G[QR Code Service]
+    end
+    
+    subgraph "Database Layer"
+        H[(PostgreSQL)]
+        I[Users Table]
+        J[Learners Table]
+        K[Attendance Table]
+    end
+    
+    subgraph "External Services"
+        L[Azure Blob Storage - QR Codes]
+        M[PDF Generation - ReportLab]
+    end
+    
+    A --> C
+    B --> C
+    C --> D
+    C --> E
+    C --> F
+    C --> G
+    D --> H
+    E --> H
+    G --> L
+    F --> M
+    H --> I
+    H --> J
+    H --> K
+    
+    style A fill:#e1f5fe
+    style B fill:#e1f5fe
+    style C fill:#f3e5f5
+    style D fill:#fce4ec
+    style E fill:#e8f5e8
+    style F fill:#fff3e0
+    style G fill:#e0f2f1
+    
+2. Database Schema Diagram
+
+erDiagram
+    User ||--o{ Attendance : manages
+    User {
+        int id PK
+        string username UK
+        string email UK
+        string password_hash
+    }
+    
+    Learner ||--o{ Attendance : has
+    Learner {
+        int id PK
+        string student_id UK
+        string first_name
+        string last_name
+        string email
+        string phone
+        string course
+        string pin_hash
+        datetime created_at
+        string qr_code_path
+    }
+    
+    Attendance {
+        int id PK
+        int learner_id FK
+        datetime timestamp
+        string status
+        text notes
+    }
+    
+    QRCodeGenerator ||..|| Learner : generates_for
+    QRCodeGenerator {
+        string generate_qr_code
+        string upload_to_azure
+        string save_locally
+    }
+    
+3. Authentication & Session Flow Diagram
+
+sequenceDiagram
+    participant User as User
+    participant Flask as Flask App
+    participant DB as Database
+    participant Session as Session Manager
+    
+    User->>Flask: GET /login
+    Flask-->>User: Render Login Form
+    
+    User->>Flask: POST /login (credentials)
+    Flask->>DB: Query User Table
+    DB-->>Flask: User Data
+    
+    alt Valid Credentials
+        Flask->>Session: Create Session
+        Flask->>User: Redirect to /dashboard
+        User->>Flask: Access Protected Route
+        Flask->>Session: Verify Session
+        Session-->>Flask: Session Valid
+        Flask-->>User: Render Protected Content
+    else Invalid Credentials
+        Flask-->>User: Show Error Message
+    end
+    
+    User->>Flask: GET /logout
+    Flask->>Session: Destroy Session
+    Flask-->>User: Redirect to Login
+    
+4. Attendance Marking Flow Diagram
+
+flowchart TD
+    Start([Start]) --> Access[Access Attendance URL]
+    Access --> PINCheck{PIN Verified?}
+    
+    PINCheck -- No --> PINPage[Redirect to PIN Validation]
+    PINPage --> PINEntry[Enter PIN]
+    PINEntry --> Verify[Verify PIN via API]
+    Verify --> CheckPIN{PIN Valid?}
+    
+    CheckPIN -- Yes --> Verified[Set Verified Flag]
+    CheckPIN -- No --> PINError[Show PIN Error]
+    PINError --> PINEntry
+    
+    PINCheck -- Yes --> Lookup[Lookup Student]
+    Lookup --> CheckExist{Student Exists?}
+    
+    CheckExist -- No --> NotFound[Show Student Not Found]
+    CheckExist -- Yes --> CheckToday{Attendance Today?}
+    
+    CheckToday -- Yes --> Update[Update Status]
+    Update --> Record[Record Updated]
+    
+    CheckToday -- No --> Create[Create New Record]
+    Create --> Record
+    
+    Record --> Display[Show Attendance Result]
+    Display --> End([End])
+    
+    NotFound --> End
+    
+5. API Endpoints Structure Diagram
+
+graph TB
+    subgraph "Authentication"
+        A1[GET /login]
+        A2[POST /login]
+        A3[GET /logout]
+    end
+    
+    subgraph "Protected Routes"
+        B1[GET / - Dashboard]
+        B2[GET /learners]
+        B3[GET /reports]
+        B4[GET /admin/system-status]
+    end
+    
+    subgraph "API Endpoints"
+        C1[GET /api/learners]
+        C2[GET /api/attendance]
+        C3[GET /api/analytics]
+        C4[POST /api/generate-report]
+        C5[POST /api/verify-pin]
+        C6[POST /api/set-pin/]
+        C7[GET /api/health]
+    end
+    
+    subgraph "Mobile Routes"
+        D1[GET /mobile/student-list]
+        D2[GET /mobile/attendance/]
+        D3[GET /mobile/absence/]
+        D4[GET /pin-validation/]
+    end
+    
+    subgraph "Public Routes"
+        E1[GET /public/student-cards]
+    end
+    
+    subgraph "Admin Routes"
+        F1[POST /api/bulk-set-pins]
+        F2[POST /api/reset-all-pins]
+        F3[GET /init-db]
+    end
+    
+    A1 & A2 --> B1
+    B1 --> C1 & C2 & C3
+    B2 --> D1
+    B3 --> C4
+    B4 --> C7
+    D1 --> D2 & D3
+    D2 & D3 --> D4
+    D4 --> C5
+    
+6. Report Generation Flow Diagram
+
+sequenceDiagram
+    participant User as User
+    participant Frontend as Frontend JS
+    participant API as Flask API
+    participant DB as Database
+    participant PDF as PDF Generator
+    participant Browser as Browser
+    
+    User->>Frontend: Select Report Parameters
+    Frontend->>API: POST /api/generate-report
+    API->>DB: Query Attendance Data
+    
+    DB-->>API: Attendance Records
+    API->>PDF: Generate PDF with ReportLab
+    PDF-->>API: PDF Buffer
+    
+    API->>Browser: Send PDF File
+    Browser->>User: Download PDF File
+    
+    Note over User,API: Report includes:<br/>- Date range filters<br/>- Course filters<br/>- Student filters<br/>- Attendance details
+    
+7. Component Interaction Diagram
+
+Component Interaction Diagram
+
+graph LR
+    subgraph "Controllers"
+        A[app.py]
+    end
+    
+    subgraph "Models"
+        B[models.py]
+    end
+    
+    subgraph "Configuration"
+        C[config.py]
+    end
+    
+    subgraph "Frontend Assets"
+        D[dashboard.js]
+        E[learners.js]
+        F[reports.js]
+    end
+    
+    subgraph "Templates"
+        G[HTML Templates]
+    end
+    
+    subgraph "External Dependencies"
+        H[Flask-Login]
+        I[SQLAlchemy]
+        J[ReportLab]
+        K[QRCode]
+    end
+    
+    A --> B
+    A --> C
+    A --> G
+    G --> D
+    G --> E
+    G --> F
+    B --> I
+    A --> H
+    A --> J
+    B --> K
+    
+    style A fill:#e3f2fd
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+    style F fill:#e0f2f1
+    
+10. Test Diagram
+
+Enhanced Database Schema
+
+erDiagram
+    User {
+        int id PK "Primary Key"
+        string username "Unique"
+        string email "Unique"
+        string password_hash
+    }
+    
+    Learner {
+        int id PK "Primary Key"
+        string student_id "Unique"
+        string first_name
+        string last_name
+        string email
+        string phone
+        string course
+        string pin_hash
+        datetime created_at
+        string qr_code_path
+    }
+    
+    Attendance {
+        int id PK "Primary Key"
+        int learner_id FK "Foreign Key to Learner"
+        datetime timestamp
+        string status
+        text notes
+    }
+    
+    User ||--o{ Learner : "manages/creates"
+    Learner ||--o{ Attendance : "has"
+    
+    note for Learner "QR Code Generation\nUtility methods in QRCodeGenerator class"
+
+11. User Management ER Diagram
+
+erDiagram
+    User ||--o{ Learner : creates
+    User {
+        int id PK
+        string username UK
+        string email UK
+        string password_hash
+    }
+    
+    Learner ||--o{ Attendance : "records"
+    Learner {
+        int id PK
+        string student_id UK
+        string first_name
+        string last_name
+        string email
+        string phone
+        string course
+        string pin_hash
+        datetime created_at
+        string qr_code_path
+    }
+    
+    Attendance {
+        int id PK
+        int learner_id FK
+        datetime timestamp
+        string status "default: 'Present'"
+        text notes
+    }
+    
+    note right of User "Administrator users who\nmanage the system"
+    
+    note right of Learner "QR codes generated via\nQRCodeGenerator utility class"
+    
+    note right of Attendance "Status can be:\n- Present (default)\n- Absent\n- Late\n- Excused"
+    
+12. Complete System ER Diagram
+
+erDiagram
+    User ||--o{ Learner : "administers"
+    Learner ||--o{ Attendance : "accumulates"
+    
+    User {
+        int id PK
+        string username UK
+        string email UK
+        string password_hash
+    }
+    
+    Learner {
+        int id PK
+        string student_id UK
+        string first_name
+        string last_name
+        string email
+        string phone
+        string course
+        string pin_hash
+        datetime created_at
+        string qr_code_path
+    }
+    
+    Attendance {
+        int id PK
+        int learner_id FK
+        datetime timestamp
+        string status
+        text notes
+    }

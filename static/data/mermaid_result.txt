@@ -1,0 +1,238 @@
+1. System Architecture Diagram
+
+graph TB
+    subgraph "Client Side"
+        Browser[Browser UI]
+    end
+    
+    subgraph "Web Server"
+        Flask[Flask Application]
+        Routes[Routes/Endpoints]
+        ORM[SQLAlchemy ORM]
+    end
+    
+    subgraph "Database Layer"
+        PostgreSQL[PostgreSQL Cloud SQL]
+        Tables[Tables:<br/>- Results<br/>- Notifications]
+    end
+    
+    subgraph "File Processing"
+        Uploads[File Upload Handler]
+        CSV_Parser[CSV Parser]
+        JSON_Parser[JSON Parser]
+        PDF_Export[PDF Export<br/>reportlab]
+    end
+    
+    Browser -->|HTTP Requests| Flask
+    Flask -->|Routes| Routes
+    Routes -->|Data Operations| ORM
+    ORM -->|SQL Queries| PostgreSQL
+    Routes -->|File Processing| Uploads
+    Uploads --> CSV_Parser
+    Uploads --> JSON_Parser
+    Routes -->|Generate Reports| PDF_Export
+    
+2. Database Schema Diagram
+
+erDiagram
+    Result {
+        int id PK "Primary Key"
+        string first_name "Not Null"
+        string last_name "Not Null"
+        string email "Not Null"
+        string subject "Not Null"
+        float score "Not Null"
+        string date_taken "Not Null"
+        datetime created_at "Default: UTC now"
+    }
+    
+    Notification {
+        int id PK "Primary Key"
+        string title "Not Null"
+        text message "Not Null"
+        string type "info/success/warning/error"
+        boolean is_read "Default: false"
+        datetime created_at "Default: UTC now"
+    }
+    
+    Result ||--o{ Notification : "triggers"
+    
+3. File Upload & Processing Flow
+
+flowchart TD
+    Start[User Uploads File] --> ValidateFile{File Valid?}
+    
+    ValidateFile -->|Invalid| Error[Show Error Message]
+    ValidateFile -->|Valid| CheckType{File Type?}
+    
+    CheckType -->|CSV| ProcessCSV[Process CSV File]
+    CheckType -->|JSON| ProcessJSON[Process JSON File]
+    
+    ProcessCSV --> ValidateCSV[Validate CSV Data]
+    ProcessJSON --> ValidateJSON[Validate JSON Data]
+    
+    ValidateCSV --> SaveCSV[Save Valid Records]
+    ValidateJSON --> SaveJSON[Save Valid Records]
+    
+    SaveCSV --> CreateNotification[Create Notification]
+    SaveJSON --> CreateNotification
+    
+    CreateNotification --> ShowResult[Show Upload Summary]
+    ShowResult --> End[Process Complete]
+    
+    Error --> End
+    
+4. API Endpoints Diagram
+
+graph LR
+    subgraph "Dashboard Endpoints"
+        GET_Dashboard[/GET /dashboard]
+        GET_Stats[/GET /api/dashboard/stats]
+    end
+    
+    subgraph "Results Endpoints"
+        GET_Results[/GET /api/results]
+        POST_Result[/POST /save_result.php]
+        GET_Filters[/GET /api/results/filters]
+        GET_Export[/GET /api/results/export-pdf]
+    end
+    
+    subgraph "Notification Endpoints"
+        GET_Notifs[/GET /api/notifications]
+        POST_ReadOne[/POST /api/notifications/ID/read]
+        POST_ReadAll[/POST /api/notifications/read-all]
+    end
+    
+    subgraph "File Upload Endpoints"
+        POST_Upload[/POST /api/upload-results]
+        GET_Template[/GET /api/download-template]
+    end
+    
+    subgraph "System Endpoints"
+        GET_InitDB[/GET /init-db]
+        GET_Debug[/GET /api/debug/stats]
+    end
+    
+    GET_Dashboard -->|Returns| DashboardHTML
+    GET_Stats -->|Returns| JSONStats
+    GET_Results -->|Returns| JSONResults
+    POST_Result -->|Creates| NewResult
+    GET_Export -->|Returns| PDFFile
+    GET_Notifs -->|Returns| JSONNotifications
+    
+5. Frontend JavaScript Module Structure
+
+graph TD
+    subgraph "JavaScript Modules"
+        CommonJS["common.js<br/>Utilities & API Client"]
+        
+        DashboardJS["dashboard.js<br/>Dashboard Manager"]
+        ResultsJS["results.js<br/>Results Manager"]
+        NotificationsJS["notifications.js<br/>Notification Manager"]
+        UploadJS["upload.js<br/>File Upload Manager"]
+    end
+    
+    subgraph "HTML Pages"
+        DashboardHTML[dashboard.html]
+        ResultsHTML[results.html]
+        NotificationsHTML[notifications.html]
+        UploadHTML[upload.html]
+    end
+    
+    subgraph "Shared Components"
+        Navbar[Top Navigation]
+        Charts[Chart.js Visualizations]
+        Bootstrap[Bootstrap Components]
+    end
+    
+    CommonJS -->|Provides| DashboardJS
+    CommonJS -->|Provides| ResultsJS
+    CommonJS -->|Provides| NotificationsJS
+    CommonJS -->|Provides| UploadJS
+    
+    DashboardHTML -->|Uses| DashboardJS
+    ResultsHTML -->|Uses| ResultsJS
+    NotificationsHTML -->|Uses| NotificationsJS
+    UploadHTML -->|Uses| UploadJS
+    
+    DashboardJS -->|Uses| Charts
+    ResultsJS -->|Uses| Bootstrap
+    
+6. Data Validation Flow
+
+flowchart TD
+    Start[Input Data Received] --> ValidateFields{All Fields Present?}
+    
+    ValidateFields -->|No| ErrorMissing[Return Missing Field Error]
+    
+    ValidateFields -->|Yes| ValidateEmail{Valid Email?}
+    ValidateEmail -->|No| ErrorEmail[Return Email Error]
+    
+    ValidateEmail -->|Yes| ValidateScore{Score 1-1000?}
+    ValidateScore -->|No| ErrorScore[Return Score Error]
+    
+    ValidateScore -->|Yes| ValidateDate{Valid Date?}
+    ValidateDate -->|No| ErrorDate[Return Date Error]
+    
+    ValidateDate -->|Yes| SaveDB[Save to Database]
+    SaveDB --> CreateNotif[Create Notification]
+    CreateNotif --> Success[Return Success]
+    
+    ErrorMissing -->|Return| Client
+    ErrorEmail -->|Return| Client
+    ErrorScore -->|Return| Client
+    ErrorDate -->|Return| Client
+    Success -->|Return| Client
+    
+7. Notification System Flow
+
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant DB
+    
+    User->>Frontend: Open Dashboard
+    Frontend->>Backend: GET /api/notifications
+    Backend->>DB: Query Notification table
+    DB-->>Backend: Return notifications
+    Backend-->>Frontend: JSON response with unread count
+    Frontend-->>User: Display badge with count
+    
+    User->>Frontend: Click notification
+    Frontend->>Backend: POST /api/notifications/ID/read
+    Backend->>DB: Update is_read = true
+    DB-->>Backend: Update successful
+    Backend-->>Frontend: Success response
+    Frontend->>Backend: GET /api/notifications (refresh)
+    Backend-->>Frontend: Updated notification list
+    Frontend-->>User: Update UI
+    
+8. PDF Export Process
+
+flowchart TD
+    Start[User Clicks Export PDF] --> ApplyFilters[Apply Current Filters]
+    ApplyFilters --> QueryDB[Query Database]
+    QueryDB --> GeneratePDF[Generate PDF with reportlab]
+    
+    subgraph "PDF Generation Steps"
+        CreateBuffer[Create Memory Buffer]
+        SetupDocument[Setup Document Template]
+        AddTitle[Add Report Title]
+        AddFilters[Add Filter Info]
+        CreateTable[Create Results Table]
+        FormatTable[Format Table Styles]
+        BuildPDF[Build PDF Document]
+    end
+    
+    GeneratePDF --> CreateBuffer
+    CreateBuffer --> SetupDocument
+    SetupDocument --> AddTitle
+    AddTitle --> AddFilters
+    AddFilters --> CreateTable
+    CreateTable --> FormatTable
+    FormatTable --> BuildPDF
+    BuildPDF --> SendFile[Send File to Browser]
+    SendFile --> End[User Downloads PDF]
+    
+
