@@ -14,39 +14,37 @@ mermaid code here
 This helps ensure that the diagramms are successfully parsed to the API.
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home01.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home11.png)
-
-
-# Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home02.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home03.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home04.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home05.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home06.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home07.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home08.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home09.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/gallery_management/blob/main/home10.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
+# Screenshot:
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
