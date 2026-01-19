@@ -17,34 +17,37 @@ This helps ensure that the diagramms are successfully parsed to the API.
 ![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home11.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home01.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home02.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home03.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home04.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home05.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home06.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home07.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home08.png)
 
 # Screenshot:
-![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home09.png)
+
+# Screenshot:
+![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home10.png)
 
 # Screenshot:
 ![alt text](https://github.com/thato2-5/mermaid_viewer/blob/main/Home.png)
